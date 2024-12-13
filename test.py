@@ -31,4 +31,20 @@ def tg_pest(client):
             assert json_data["success"] is True
             assert len(json_data["data"]) == 100
 
+def tg_pests(client):
+    mkps = pest(
+         id=1,
+         name="cockroach",
+    )
+
+    with app.app_context():
+        with patch("app.pest.query.get") as mock_get:
+            mock_get.return_value = mkps
+            response = client.get("/pest/1")
+            assert response.status_code == 200
+            json_data = response.get_json()
+            assert json_data["success"] is True
+            assert json_data["data"]["id"] == 1
+
+
 
