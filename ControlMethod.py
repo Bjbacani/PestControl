@@ -30,4 +30,21 @@ def get_cm():
             "data": [cms.dict() for cms in cm]
         }
     ), 200
+    
+@app.route("/control_method/<int:id>", methods=['GET'])
+def get_cms(id):
+    cms = db.session.get(control_method, id)
+    if not cms:
+        return jsonify(
+            {
+                "success": False,
+                "error": "control Method not found"
+            }
+        ), 400
+    return jsonify(
+        {
+            "success": True,
+            "data": cms.dict()
+        }
+    ), 200
 
