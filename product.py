@@ -95,3 +95,34 @@ def add_prod():
         }
     ), 201
 
+@app.route("/products/<int:id>", methods=["PUT"])
+def update_pr(id):
+    prs = db.session.get(products, id)
+    if not prs:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Product not found"
+            }
+        ), 404
+    
+    data = request.get_json()
+    updatable_fields = ["id","name", "detail"]
+    
+    for field in updatable_fields:
+        if field not in data:
+            return jsonify(
+                {
+                    "success": False,
+                    "error": f"Missing field: {field}"
+                }
+            ), 400
+
+    db.session.commit()
+    return jsonify(
+        {
+            "success": True,
+            "data": products.dict()
+        }
+    ), 200
+    
