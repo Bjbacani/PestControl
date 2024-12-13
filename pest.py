@@ -49,3 +49,46 @@ def get_pest(id):
         }
     ), 200
 
+@app.route("/pest", methods=['POST'])
+def add_pest():
+    if not request.is_json:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Content-type must be application/json"
+            }
+        ), 400
+    data = request.get_json()
+    required_fields = ["id", "name"]
+    
+    for field in required_fields:
+        if field not in data:
+            return jsonify(
+                {
+                    "success": False,
+                    "error": f"Missing field: {field}"
+                }
+            ), 400
+            
+    try:
+        new_pest = pest(
+            id=data["id"],
+            name=data["name"]
+         )
+        db.session.add(new_pest)
+        db.session.commit()
+    except Exception as e:
+        return jsonify(
+            {
+                "success": False,
+                "error": str(e)
+            }
+        ), 500
+    
+    return jsonify(
+        {
+            "success": True,
+            "data": new_pest.dict()
+        }
+    ), 201
+
