@@ -91,4 +91,35 @@ def add_cm():
         }
     ), 201
 
+@app.route("/control_method/<int:id>", methods=["PUT"])
+def update_cm(id):
+    cms = db.session.get(control_method, id)
+    if not cms:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Control Method not found"
+            }
+        ), 404
+    
+    data = request.get_json()
+    updatable_fields = ["id","type"]
+    
+    for field in updatable_fields:
+        if field not in data:
+            return jsonify(
+                {
+                    "success": False,
+                    "error": f"Missing field: {field}"
+                }
+            ), 400
+
+    db.session.commit()
+    return jsonify(
+        {
+            "success": True,
+            "data": control_method.dict()
+        }
+    ), 200
+
 
