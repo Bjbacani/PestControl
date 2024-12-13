@@ -46,5 +46,23 @@ def tg_pests(client):
             assert json_data["success"] is True
             assert json_data["data"]["id"] == 1
 
+def tup(client):
+    ep = pest(
+         id=1,
+         name="cockroach",
+    )
+
+    with app.app_context():
+        with patch("app.pest.query.get") as mock_get, patch("app.db.session.commit", autospec=True):
+            mock_get.return_value = ep
+            updated_data = {
+                "name": "Updated cockroachjr",
+            }
+            response = client.put("/pest/1", json=updated_data)
+            assert response.status_code == 200
+            json_data = response.get_json()
+            assert json_data["success"] is True
+            assert json_data["data"]["name"] == "Updated cockroachjr"
+
 
 
