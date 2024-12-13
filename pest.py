@@ -92,3 +92,34 @@ def add_pest():
         }
     ), 201
 
+@app.route("/pest/<int:id>", methods=["PUT"])
+def update_pest(id):
+    Pests = db.session.get(pest, id)
+    if not Pests:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Pest not found"
+            }
+        ), 404
+    
+    data = request.get_json()
+    updatable_fields = ["id","name"]
+    
+    for field in updatable_fields:
+        if field not in data:
+            return jsonify(
+                {
+                    "success": False,
+                    "error": f"Missing field: {field}"
+                }
+            ), 400
+
+    db.session.commit()
+    return jsonify(
+        {
+            "success": True,
+            "data": pest.dict()
+        }
+    ), 200
+
