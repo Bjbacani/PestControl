@@ -24,4 +24,13 @@ class products(db.Model):
             
         }
 
+@app.route("/products", methods=["GET"])
+def get_prod():
+    pr = products.query.limit(100)
+    return jsonify(
+        {
+            "success": True,
+            "data": [prs.dict() for prs in pr]
+        }
+    ), 200
 
