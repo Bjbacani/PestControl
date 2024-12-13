@@ -21,3 +21,13 @@ class control_method(db.Model):
             "type": self.type
             
         }
+@app.route("/control_method", methods=["GET"])
+def get_cm():
+    cm = control_method.query.limit(100)
+    return jsonify(
+        {
+            "success": True,
+            "data": [cms.dict() for cms in cm]
+        }
+    ), 200
+
