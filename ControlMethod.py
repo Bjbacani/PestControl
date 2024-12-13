@@ -47,4 +47,48 @@ def get_cms(id):
             "data": cms.dict()
         }
     ), 200
+    
+@app.route("/control_method", methods=['POST'])
+def add_cm():
+    if not request.is_json:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Content-type must be application/json"
+            }
+        ), 400
+    data = request.get_json()
+    required_fields = ["id", "type"]
+    
+    for field in required_fields:
+        if field not in data:
+            return jsonify(
+                {
+                    "success": False,
+                    "error": f"Missing field: {field}"
+                }
+            ), 400
+            
+    try:
+        new_cm = control_method(
+            id=data["id"],
+            name=data["type"]
+         )
+        db.session.add(new_cm)
+        db.session.commit()
+    except Exception as e:
+        return jsonify(
+            {
+                "success": False,
+                "error": str(e)
+            }
+        ), 500
+    
+    return jsonify(
+        {
+            "success": True,
+            "data": new_cm.dict()
+        }
+    ), 201
+
 
