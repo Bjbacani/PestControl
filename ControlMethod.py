@@ -21,6 +21,7 @@ class control_method(db.Model):
             "type": self.type
             
         }
+        
 @app.route("/control_method", methods=["GET"])
 def get_cm():
     cm = control_method.query.limit(100)
