@@ -51,3 +51,47 @@ def get_prods(id):
         }
     ), 200
 
+@app.route("/products", methods=['POST'])
+def add_prod():
+    if not request.is_json:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Content-type must be application/json"
+            }
+        ), 400
+    data = request.get_json()
+    required_fields = ["id", "name", "detail"]
+    
+    for field in required_fields:
+        if field not in data:
+            return jsonify(
+                {
+                    "success": False,
+                    "error": f"Missing field: {field}"
+                }
+            ), 400
+            
+    try:
+        new_pr = products(
+            id=data["id"],
+            name=data["name"],
+            detail=data["detail"]
+         )
+        db.session.add(new_pr)
+        db.session.commit()
+    except Exception as e:
+        return jsonify(
+            {
+                "success": False,
+                "error": str(e)
+            }
+        ), 500
+    
+    return jsonify(
+        {
+            "success": True,
+            "data": new_pr.dict()
+        }
+    ), 201
+
