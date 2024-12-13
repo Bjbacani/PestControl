@@ -63,6 +63,17 @@ def tup(client):
             json_data = response.get_json()
             assert json_data["success"] is True
             assert json_data["data"]["name"] == "Updated cockroachjr"
-
+            
+def tdp(client):
+    with app.app_context():
+        with patch("app.pest.query.get") as mock_get, patch("app.db.session.delete"), patch("app.db.session.commit"):
+            mkps = pest(
+                id=1,
+                name="cockroach",
+            )
+            mock_get.return_value = mkps
+            response = client.delete("/pest/1")
+            assert response.status_code == 204
+            assert response.data == b''
 
 
