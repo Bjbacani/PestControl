@@ -122,4 +122,15 @@ def update_pest(id):
             "data": pest.dict()
         }
     ), 200
+    
+@app.route("/pest/<int:id>", methods=["DELETE"])
+def delete_pest(id):
+    Pests = db.session.get(pest, id)
+    if not Pests:
+        return jsonify(
+            {
+                "success": True,
+                "message": "Pest successfully Deleted"
+            }
+        ), 204
 
