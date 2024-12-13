@@ -9,3 +9,15 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
 db = SQLAlchemy(app)
+
+class control_method(db.Model):
+    __tablename__='control_method'
+    id = db.Column(db.Integer, primary_key=True)
+    type = db.Column(db.String(45), nullable=False)
+    
+    def dict(self):
+        return {
+            "id": self.id,
+            "type": self.type
+            
+        }
