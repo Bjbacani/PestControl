@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch
-from datetime import datetime
-from app import app, pest
+from pest import app, pest
+
 
 @pytest.fixture
 def client():
@@ -23,7 +23,7 @@ def tg_pest(client):
     ]
     
     with app.app_context():
-        with patch("app.pest.query.all") as mock_all:
+        with patch("test.pest.query.all") as mock_all:
             mock_all.return_value = mkp
             response = client.get("/pest")
             assert response.status_code == 200
@@ -38,7 +38,7 @@ def tg_pests(client):
     )
 
     with app.app_context():
-        with patch("app.pest.query.get") as mock_get:
+        with patch("test.pest.query.get") as mock_get:
             mock_get.return_value = mkps
             response = client.get("/pest/1")
             assert response.status_code == 200
