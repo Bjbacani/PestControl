@@ -34,3 +34,20 @@ def get_prod():
         }
     ), 200
 
+@app.route("/products/<int:id>", methods=['GET'])
+def get_prods(id):
+    prs = db.session.get(products, id)
+    if not prs:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Product not found"
+            }
+        ), 400
+    return jsonify(
+        {
+            "success": True,
+            "data": prs.dict()
+        }
+    ), 200
+
