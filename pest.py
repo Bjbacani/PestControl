@@ -31,3 +31,21 @@ def get_pests():
             "data": [Pests.dict() for Pests in Pest]
         }
     ), 200
+
+@app.route("/pest/<int:id>", methods=['GET'])
+def get_pest(id):
+    Pests = db.session.get(pest, id)
+    if not Pests:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Pest not found"
+            }
+        ), 400
+    return jsonify(
+        {
+            "success": True,
+            "data": Pests.dict()
+        }
+    ), 200
+
