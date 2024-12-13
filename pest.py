@@ -21,3 +21,13 @@ class pest(db.Model):
             "name": self.name
             
         }
+        
+@app.route("/pest", methods=["GET"])
+def get_pests():
+    Pest = pest.query.limit(100)
+    return jsonify(
+        {
+            "success": True,
+            "data": [Pests.dict() for Pests in Pest]
+        }
+    ), 200
