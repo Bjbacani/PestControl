@@ -121,5 +121,19 @@ def update_cm(id):
             "data": control_method.dict()
         }
     ), 200
+    
+@app.route("/control_method/<int:id>", methods=["DELETE"])
+def delete_cm(id):
+    cms = db.session.get(control_method, id)
+    if not cms:
+        return jsonify(
+            {
+                "success": True,
+                "message": "Control Method successfully Deleted"
+            }
+        ), 204
+
+if __name__ == 'main':
+    app.run(debug=True)
 
 
