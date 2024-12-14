@@ -50,3 +50,48 @@ def get_pcms(id):
             "data": pcms.dict()
         }
     ), 200
+
+
+@app.route("/pest_control_methods", methods=['POST'])
+def add_pcm():
+    if not request.is_json:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Content-type must be application/json"
+            }
+        ), 400
+    data = request.get_json()
+    required_fields = ["id", "Pest_id", "Control_Method_id"]
+    
+    for field in required_fields:
+        if field not in data:
+            return jsonify(
+                {
+                    "success": False,
+                    "error": f"Missing field: {field}"
+                }
+            ), 400
+            
+    try:
+        new_pcm = pest_control_methods(
+            id=data["id"],
+            Pest_id=data["Pest_id"],
+            Control_Method_id=data["Control_Method_id"]
+         )
+        db.session.add(new_pcm)
+        db.session.commit()
+    except Exception as e:
+        return jsonify(
+            {
+                "success": False,
+                "error": str(e)
+            }
+        ), 500
+    
+    return jsonify(
+        {
+            "success": True,
+            "data": new_pcm.dict()
+        }
+    ), 201
