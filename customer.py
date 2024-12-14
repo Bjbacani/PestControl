@@ -98,4 +98,35 @@ def add_cust():
             "data": new_c.dict()
         }
     ), 201
+    
+@app.route("/customer/<int:id>", methods=["PUT"])
+def update_c(id):
+    crs = db.session.get(customer, id)
+    if not crs:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Customer not found"
+            }
+        ), 404
+    
+    data = request.get_json()
+    updatable_fields = ["id","name", "number", "location"]
+    
+    for field in updatable_fields:
+        if field not in data:
+            return jsonify(
+                {
+                    "success": False,
+                    "error": f"Missing field: {field}"
+                }
+            ), 400
+
+    db.session.commit()
+    return jsonify(
+        {
+            "success": True,
+            "data": customer.dict()
+        }
+    ), 200
 
