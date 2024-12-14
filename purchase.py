@@ -23,7 +23,7 @@ class purchase(db.Model):
             "id": self.id,
             "date": self.date,
             "product_id": self.product_id,
-            "customer_id": self.customer_id,
+            "customer_id": self.customer_id
             
         }
 
