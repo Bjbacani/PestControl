@@ -1,6 +1,6 @@
 import pytest
 from unittest.mock import patch
-from pest import app, pest
+from purchase import app, purchase
 
 
 @pytest.fixture
@@ -10,69 +10,78 @@ def client():
 
 def tg_pest(client):
     mkp = [
-        pest(
+        purchase(
             id=1,
-            name="cockroach",
-           
+            date="5/19/2014",
+            product_id=1,
+            customer_id=1
         ),
-        pest(
+        purchase(
             id=2,
-            name="insect",
+            date="2/13/2021",
+            product_id=2,
+            customer_id=2
           
         ),
     ]
     
     with app.app_context():
-        with patch("test.pest.query.all") as mock_all:
+        with patch("test.purchase.query.all") as mock_all:
             mock_all.return_value = mkp
-            response = client.get("/pest")
+            response = client.get("/purchase")
             assert response.status_code == 200
             json_data = response.get_json()
             assert json_data["success"] is True
             assert len(json_data["data"]) == 100
 
 def tg_pests(client):
-    mkps = pest(
+    mkps = purchase(
          id=1,
-         name="cockroach",
+         date="5/19/2014",
+         product_id=1,
+         customer_id=1
     )
 
     with app.app_context():
-        with patch("test.pest.query.get") as mock_get:
+        with patch("test.purchase.query.get") as mock_get:
             mock_get.return_value = mkps
-            response = client.get("/pest/1")
+            response = client.get("/purchase/1")
             assert response.status_code == 200
             json_data = response.get_json()
             assert json_data["success"] is True
             assert json_data["data"]["id"] == 1
 
 def tup(client):
-    ep = pest(
+    ep = purchase(
          id=1,
-         name="cockroach",
+         date="5/19/2014",
+         product_id=1,
+         customer_id=1
     )
 
     with app.app_context():
-        with patch("app.pest.query.get") as mock_get, patch("app.db.session.commit", autospec=True):
+        with patch("app.purchase.query.get") as mock_get, patch("app.db.session.commit", autospec=True):
             mock_get.return_value = ep
             updated_data = {
-                "name": "Updated cockroachjr",
+                "date": "2/12/2024",
             }
-            response = client.put("/pest/1", json=updated_data)
+            response = client.put("/purchase/1", json=updated_data)
             assert response.status_code == 200
             json_data = response.get_json()
             assert json_data["success"] is True
-            assert json_data["data"]["name"] == "Updated cockroachjr"
+            assert json_data["data"]["date"] == "Updated 2/12/2024"
             
 def tdp(client):
     with app.app_context():
-        with patch("app.pest.query.get") as mock_get, patch("app.db.session.delete"), patch("app.db.session.commit"):
-            mkps = pest(
+        with patch("app.purchase.query.get") as mock_get, patch("app.db.session.delete"), patch("app.db.session.commit"):
+            mkps = purchase(
                 id=1,
-                name="cockroach",
+                date="5/19/2014",
+                product_id=1,
+                customer_id=1
             )
             mock_get.return_value = mkps
-            response = client.delete("/pest/1")
+            response = client.delete("/purchase/1")
             assert response.status_code == 204
             assert response.data == b''
 
