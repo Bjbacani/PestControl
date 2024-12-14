@@ -95,3 +95,34 @@ def add_pcm():
             "data": new_pcm.dict()
         }
     ), 201
+
+@app.route("/pest_control_methods/<int:id>", methods=["PUT"])
+def update_pcm(id):
+    prs = db.session.get(pest_control_methods, id)
+    if not prs:
+        return jsonify(
+            {
+                "success": False,
+                "error": " Not found"
+            }
+        ), 404
+    
+    data = request.get_json()
+    updatable_fields = ["id","Pest_id", "Control_Method_id"]
+    
+    for field in updatable_fields:
+        if field not in data:
+            return jsonify(
+                {
+                    "success": False,
+                    "error": f"Missing field: {field}"
+                }
+            ), 400
+
+    db.session.commit()
+    return jsonify(
+        {
+            "success": True,
+            "data": pest_control_methods.dict()
+        }
+    ), 200
