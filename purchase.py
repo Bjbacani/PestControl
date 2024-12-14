@@ -17,7 +17,6 @@ class purchase(db.Model):
     product_id = db.Column(db.Integer, primary_key=True)
     customer_id = db.Column(db.Integer, primary_key=True)
     
-    
     def dict(self):
         return {
             "id": self.id,
