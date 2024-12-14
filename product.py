@@ -10,23 +10,27 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-class products(db.Model):
-    __tablename__='products'
+class product(db.Model):
+    __tablename__='product'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(45), nullable=False)
-    detail = db.Column(db.String(45), nullable=False)
+    c_method = db.Column(db.String(45), nullable=False)
+    c_type = db.Column(db.String(45), nullable=False)
+    pest = db.Column(db.String(45), nullable=False)
     
     def dict(self):
         return {
             "id": self.id,
             "name": self.name,
-            "detail": self.detail
+            "c_method": self.c_method,
+            "c_type": self.c_type,
+            "pest": self.pest
             
         }
 
-@app.route("/products", methods=["GET"])
+@app.route("/product", methods=["GET"])
 def get_prod():
-    pr = products.query.limit(100)
+    pr = product.query.limit(100)
     return jsonify(
         {
             "success": True,
@@ -34,9 +38,9 @@ def get_prod():
         }
     ), 200
 
-@app.route("/products/<int:id>", methods=['GET'])
+@app.route("/product/<int:id>", methods=['GET'])
 def get_prods(id):
-    prs = db.session.get(products, id)
+    prs = db.session.get(product, id)
     if not prs:
         return jsonify(
             {
@@ -51,7 +55,7 @@ def get_prods(id):
         }
     ), 200
 
-@app.route("/products", methods=['POST'])
+@app.route("/product", methods=['POST'])
 def add_prod():
     if not request.is_json:
         return jsonify(
@@ -61,7 +65,7 @@ def add_prod():
             }
         ), 400
     data = request.get_json()
-    required_fields = ["id", "name", "detail"]
+    required_fields = ["id", "name","c_method", "c_type","pest"]
     
     for field in required_fields:
         if field not in data:
@@ -73,10 +77,12 @@ def add_prod():
             ), 400
             
     try:
-        new_pr = products(
+        new_pr = product(
             id=data["id"],
             name=data["name"],
-            detail=data["detail"]
+            c_method=data["c_method"],
+            c_type=data["c_type"],
+            pest=data["pest"]
          )
         db.session.add(new_pr)
         db.session.commit()
@@ -95,9 +101,9 @@ def add_prod():
         }
     ), 201
 
-@app.route("/products/<int:id>", methods=["PUT"])
+@app.route("/product/<int:id>", methods=["PUT"])
 def update_pr(id):
-    prs = db.session.get(products, id)
+    prs = db.session.get(product, id)
     if not prs:
         return jsonify(
             {
@@ -107,7 +113,7 @@ def update_pr(id):
         ), 404
     
     data = request.get_json()
-    updatable_fields = ["id","name", "detail"]
+    updatable_fields = ["id","name","c_method","c_type", "pest"]
     
     for field in updatable_fields:
         if field not in data:
@@ -122,13 +128,13 @@ def update_pr(id):
     return jsonify(
         {
             "success": True,
-            "data": products.dict()
+            "data": product.dict()
         }
     ), 200
     
-@app.route("/products/<int:id>", methods=["DELETE"])
+@app.route("/product/<int:id>", methods=["DELETE"])
 def delete_pr(id):
-    prs = db.session.get(products, id)
+    prs = db.session.get(product, id)
     if not prs:
         return jsonify(
             {
