@@ -56,3 +56,49 @@ def get_prods(id):
             "data": prs.dict()
         }
     ), 200
+
+@app.route("/experiences", methods=['POST'])
+def add_prod():
+    if not request.is_json:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Content-type must be application/json"
+            }
+        ), 400
+    data = request.get_json()
+    required_fields = ["id", "date","product_id", "customer_id","experience"]
+    
+    for field in required_fields:
+        if field not in data:
+            return jsonify(
+                {
+                    "success": False,
+                    "error": f"Missing field: {field}"
+                }
+            ), 400
+            
+    try:
+        new_pr = experiences(
+            id=data["id"],
+            name=data["name"],
+            product_id=data["product_id"],
+            customer_id=data["customer_id"],
+            experience=data["experience"]
+         )
+        db.session.add(new_pr)
+        db.session.commit()
+    except Exception as e:
+        return jsonify(
+            {
+                "success": False,
+                "error": str(e)
+            }
+        ), 500
+    
+    return jsonify(
+        {
+            "success": True,
+            "data": new_pr.dict()
+        }
+    ), 201
