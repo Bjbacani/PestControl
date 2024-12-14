@@ -9,3 +9,17 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
 db = SQLAlchemy(app)
+
+class pest_control_methods(db.Model):
+    __tablename__='pest_control_methods'
+    id = db.Column(db.Integer, primary_key=True)
+    Pest_id = db.Column(db.Integer, primary_key=True)
+    Control_Method_id = db.Column(db.Integer, primary_key=True)
+    
+    def dict(self):
+        return {
+            "id": self.id,
+            "Pest_id": self.Pest_id,
+            "Control_Method_id": self.Control_Method_id
+            
+        }
