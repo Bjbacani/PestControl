@@ -9,3 +9,20 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
 db = SQLAlchemy(app)
+
+class products(db.Model):
+    __tablename__='products'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(45), nullable=False)
+    number = db.Column(db.String(100), nullable=False)
+    location = db.Column(db.String(45), nullable=False)
+    
+    def dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "number": self.number,
+            "location": self.location
+            
+            
+        }
