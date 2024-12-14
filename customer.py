@@ -10,8 +10,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-class products(db.Model):
-    __tablename__='products'
+class customer(db.Model):
+    __tablename__='customer'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(45), nullable=False)
     number = db.Column(db.String(100), nullable=False)
@@ -26,3 +26,29 @@ class products(db.Model):
             
             
         }
+@app.route("/customer", methods=["GET"])
+def get_c():
+    cr = customer.query.limit(100)
+    return jsonify(
+        {
+            "success": True,
+            "data": [crs.dict() for crs in cr]
+        }
+    ), 200
+
+@app.route("/customer/<int:id>", methods=['GET'])
+def get_cs(id):
+    crs = db.session.get(customer, id)
+    if not crs:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Product not found"
+            }
+        ), 400
+    return jsonify(
+        {
+            "success": True,
+            "data": crs.dict()
+        }
+    ), 200
