@@ -43,7 +43,7 @@ def get_cs(id):
         return jsonify(
             {
                 "success": False,
-                "error": "Product not found"
+                "error": "customer not found"
             }
         ), 400
     return jsonify(
@@ -52,3 +52,50 @@ def get_cs(id):
             "data": crs.dict()
         }
     ), 200
+    
+    
+@app.route("/customer", methods=['POST'])
+def add_cust():
+    if not request.is_json:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Content-type must be application/json"
+            }
+        ), 400
+    data = request.get_json()
+    required_fields = ["id", "name", "number", "location"]
+    
+    for field in required_fields:
+        if field not in data:
+            return jsonify(
+                {
+                    "success": False,
+                    "error": f"Missing field: {field}"
+                }
+            ), 400
+            
+    try:
+        new_c = customer(
+            id=data["id"],
+            name=data["name"],
+            number=data["number"],
+            location=data["location"]
+         )
+        db.session.add(new_c)
+        db.session.commit()
+    except Exception as e:
+        return jsonify(
+            {
+                "success": False,
+                "error": str(e)
+            }
+        ), 500
+    
+    return jsonify(
+        {
+            "success": True,
+            "data": new_c.dict()
+        }
+    ), 201
+
