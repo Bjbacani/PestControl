@@ -126,3 +126,17 @@ def update_pcm(id):
             "data": pest_control_methods.dict()
         }
     ), 200
+
+@app.route("/pest_control_methods/<int:id>", methods=["DELETE"])
+def delete_pcm(id):
+    prs = db.session.get(pest_control_methods, id)
+    if not prs:
+        return jsonify(
+            {
+                "success": True,
+                "message": " Successfully Deleted"
+            }
+        ), 204
+
+if __name__ == 'main':
+    app.run(debug=True)
