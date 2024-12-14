@@ -131,3 +131,16 @@ def update_pr(id):
         }
     ), 200
 
+@app.route("/purchase/<int:id>", methods=["DELETE"])
+def delete_pr(id):
+    prs = db.session.get(purchase, id)
+    if not prs:
+        return jsonify(
+            {
+                "success": True,
+                "message": " successfully Deleted"
+            }
+        ), 204
+
+if __name__ == 'main':
+    app.run(debug=True)
