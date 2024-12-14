@@ -23,7 +23,8 @@ class purchase(db.Model):
             "id": self.id,
             "date": self.date,
             "product_id": self.product_id,
-            "customer_id": self.customer_id
+            "customer_id": self.customer_id,
+          
             
         }
 
@@ -45,7 +46,7 @@ def get_prods(id):
         return jsonify(
             {
                 "success": False,
-                "error": "purchase not found"
+                "error": "not found"
             }
         ), 400
     return jsonify(
@@ -79,7 +80,7 @@ def add_prod():
     try:
         new_pr = purchase(
             id=data["id"],
-            name=data["name"],
+            date=data["date"],
             product_id=data["product_id"],
             customer_id=data["customer_id"]
          )
@@ -112,7 +113,7 @@ def update_pr(id):
         ), 404
     
     data = request.get_json()
-    updatable_fields = ["id","date","purchase_id","customer_id"]
+    updatable_fields = ["id","date","product_id","customer_id"]
     
     for field in updatable_fields:
         if field not in data:
@@ -130,6 +131,7 @@ def update_pr(id):
             "data": purchase.dict()
         }
     ), 200
+
 
 @app.route("/purchase/<int:id>", methods=["DELETE"])
 def delete_pr(id):
