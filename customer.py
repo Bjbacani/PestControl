@@ -130,3 +130,17 @@ def update_c(id):
         }
     ), 200
 
+@app.route("/customer/<int:id>", methods=["DELETE"])
+def delete_c(id):
+    crs = db.session.get(customer, id)
+    if not crs:
+        return jsonify(
+            {
+                "success": True,
+                "message": "customer successfully Deleted"
+            }
+        ), 204
+
+if __name__ == 'main':
+    app.run(debug=True)
+
