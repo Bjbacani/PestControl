@@ -4,7 +4,7 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://ads2:root@127.0.0.1/mydb'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:password@127.0.0.1/mydb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 
@@ -29,11 +29,12 @@ class purchase(db.Model):
 
 @app.route("/purchase", methods=["GET"])
 def get_prod():
-    pr = purchase.query.limit(100)
+    pr = purchase.query.all()
+    purchase_list = [p.dict() for p in pr]
     return jsonify(
         {
             "success": True,
-            "data": [prs.dict() for prs in pr]
+            "data": purchase_list
         }
     ), 200
 
@@ -122,12 +123,13 @@ def update_pr(id):
                     "error": f"Missing field: {field}"
                 }
             ), 400
+        setattr(prs, field, data[field])
 
     db.session.commit()
     return jsonify(
         {
             "success": True,
-            "data": purchase.dict()
+            "data": prs.dict()
         }
     ), 200
 
@@ -138,10 +140,20 @@ def delete_pr(id):
     if not prs:
         return jsonify(
             {
-                "success": True,
-                "message": " successfully Deleted"
+                "success": False,
+                "error": "Not found"
             }
-        ), 204
+        ), 404
+        
+    db.session.delete(prs)
+    db.session.commit()
+    
+    return jsonify(
+        {
+            "success": True,
+            "message": "Successfully Deleted"
+        }
+    ), 204
 
-if __name__ == 'main':
+if __name__ == '__main__':
     app.run(debug=True)

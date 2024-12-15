@@ -7,7 +7,6 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@127.0.0.1/mydb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-
 db = SQLAlchemy(app)
 
 class products(db.Model):
@@ -21,7 +20,6 @@ class products(db.Model):
             "id": self.id,
             "name": self.name,
             "detail": self.detail
-            
         }
 
 @app.route("/products", methods=["GET"])
@@ -107,22 +105,17 @@ def update_pr(id):
         ), 404
     
     data = request.get_json()
-    updatable_fields = ["id","name", "detail"]
+    updatable_fields = ["id", "name", "detail"]
     
     for field in updatable_fields:
-        if field not in data:
-            return jsonify(
-                {
-                    "success": False,
-                    "error": f"Missing field: {field}"
-                }
-            ), 400
+        if field in data:
+            setattr(prs, field, data[field])
 
     db.session.commit()
     return jsonify(
         {
             "success": True,
-            "data": products.dict()
+            "data": prs.dict()
         }
     ), 200
     
@@ -132,10 +125,19 @@ def delete_pr(id):
     if not prs:
         return jsonify(
             {
-                "success": True,
-                "message": "Product successfully Deleted"
+                "success": False,
+                "error": "Product not found"
             }
-        ), 204
+        ), 404
+    
+    db.session.delete(prs)
+    db.session.commit()
+    return jsonify(
+        {
+            "success": True,
+            "message": "Product successfully Deleted"
+        }
+    ), 204
 
-if __name__ == 'main':
+if __name__ == '__main__':
     app.run(debug=True)
