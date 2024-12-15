@@ -4,20 +4,18 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:root@127.0.0.1/mydb'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:password@127.0.0.1/mydb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 
 db = SQLAlchemy(app)
 
 class experiences(db.Model):
-    __tablename__='experiences'
+    __tablename__ = 'experiences'
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.String(45), nullable=False)
-    product_id = db.Column(db.Integer, primary_key=True)
-    customer_id = db.Column(db.Integer, primary_key=True)
-    experience = db.Column(db.String(45), nullable=False)
-    
+    product_id = db.Column(db.Integer, nullable=False)
+    customer_id = db.Column(db.Integer, nullable=False)
+    experience = db.Column(db.String(255), nullable=False)
     
     def dict(self):
         return {
@@ -26,39 +24,37 @@ class experiences(db.Model):
             "product_id": self.product_id,
             "customer_id": self.customer_id,
             "experience": self.experience
-            
         }
 
 @app.route("/experiences", methods=["GET"])
-def get_prod():
-    pr = experiences.query.limit(100)
+def get_experiences():
+    exp = experiences.query.limit(100)
     return jsonify(
         {
             "success": True,
-            "data": [prs.dict() for prs in pr]
+            "data": [e.dict() for e in exp]
         }
     ), 200
 
-
 @app.route("/experiences/<int:id>", methods=['GET'])
-def get_prods(id):
-    prs = db.session.get(experiences, id)
-    if not prs:
+def get_experience(id):
+    exp = db.session.get(experiences, id)
+    if not exp:
         return jsonify(
             {
                 "success": False,
                 "error": "not found"
             }
-        ), 400
+        ), 404
     return jsonify(
         {
             "success": True,
-            "data": prs.dict()
+            "data": exp.dict()
         }
     ), 200
 
 @app.route("/experiences", methods=['POST'])
-def add_prod():
+def add_experience():
     if not request.is_json:
         return jsonify(
             {
@@ -67,7 +63,7 @@ def add_prod():
             }
         ), 400
     data = request.get_json()
-    required_fields = ["id", "date","product_id", "customer_id","experience"]
+    required_fields = ["id", "date", "product_id", "customer_id", "experience"]
     
     for field in required_fields:
         if field not in data:
@@ -79,72 +75,77 @@ def add_prod():
             ), 400
             
     try:
-        new_pr = experiences(
+        new_experience = experiences(
             id=data["id"],
-            name=data["name"],
+            date=data["date"],
             product_id=data["product_id"],
             customer_id=data["customer_id"],
             experience=data["experience"]
-         )
-        db.session.add(new_pr)
+        )
+        db.session.add(new_experience)
         db.session.commit()
+        
+        return jsonify(
+            {
+                "success": True,
+                "data": new_experience.dict()
+            }
+        ), 201
     except Exception as e:
+        db.session.rollback()
         return jsonify(
             {
                 "success": False,
                 "error": str(e)
             }
         ), 500
-    
-    return jsonify(
-        {
-            "success": True,
-            "data": new_pr.dict()
-        }
-    ), 201
 
 @app.route("/experiences/<int:id>", methods=["PUT"])
-def update_pr(id):
-    prs = db.session.get(experiences, id)
-    if not prs:
+def update_experience(id):
+    exp = db.session.get(experiences, id)
+    if not exp:
         return jsonify(
             {
                 "success": False,
-                "error": " Not found"
+                "error": "Not found"
             }
         ), 404
     
     data = request.get_json()
-    updatable_fields = ["id","date","purchase_id","customer_id", "experiences"]
+    updatable_fields = ["id", "date", "product_id", "customer_id", "experience"]
     
     for field in updatable_fields:
-        if field not in data:
-            return jsonify(
-                {
-                    "success": False,
-                    "error": f"Missing field: {field}"
-                }
-            ), 400
+        if field in data:  # Changed from 'if field not in data'
+            setattr(exp, field, data[field])
 
     db.session.commit()
     return jsonify(
         {
             "success": True,
-            "data": experiences.dict()
+            "data": exp.dict()
         }
     ), 200
 
-
 @app.route("/experiences/<int:id>", methods=["DELETE"])
-def delete_pr(id):
-    prs = db.session.get(experiences, id)
-    if not prs:
+def delete_experience(id):
+    exp = db.session.get(experiences, id)
+    if not exp:
         return jsonify(
             {
-                "success": True,
-                "message": " successfully Deleted"
+                "success": False,
+                "error": "Not found"
             }
-        ), 204
+        ), 404
+        
+    db.session.delete(exp)
+    db.session.commit()
+    
+    return jsonify(
+        {
+            "success": True,
+            "message": "Successfully deleted"
+        }
+    ), 204
 
-if __name__ == 'main':
+if __name__ == '__main__':
     app.run(debug=True)
