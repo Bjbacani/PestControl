@@ -43,7 +43,7 @@ def get_experience(id):
         return jsonify(
             {
                 "success": False,
-                "error": "not found"
+                "error": "Experience not found"
             }
         ), 404
     return jsonify(
@@ -107,15 +107,15 @@ def update_experience(id):
         return jsonify(
             {
                 "success": False,
-                "error": "Not found"
+                "error": "Experience not found"
             }
         ), 404
     
     data = request.get_json()
-    updatable_fields = ["id", "date", "product_id", "customer_id", "experience"]
+    updatable_fields = ["date", "product_id", "customer_id", "experience"]
     
     for field in updatable_fields:
-        if field in data:  # Changed from 'if field not in data'
+        if field in data:
             setattr(exp, field, data[field])
 
     db.session.commit()
@@ -133,7 +133,7 @@ def delete_experience(id):
         return jsonify(
             {
                 "success": False,
-                "error": "Not found"
+                "error": "Experience not found"
             }
         ), 404
         
@@ -148,4 +148,11 @@ def delete_experience(id):
     ), 204
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    try:
+        with app.app_context():
+            db.create_all()
+            print("Database tables created successfully!")
+    except Exception as e:
+        print(f"Error: {e}")
+    
+    app.run(debug=True, port=5003)
