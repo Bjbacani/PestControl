@@ -52,3 +52,50 @@ def get_customer(id):
             "data": cust.dict()
         }
     ), 200
+
+
+@app.route("/customer", methods=['POST'])
+def add_customer():
+    if not request.is_json:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Content-type must be application/json"
+            }
+        ), 400
+    data = request.get_json()
+    required_fields = ["id", "name", "number", "location"]
+    
+    for field in required_fields:
+        if field not in data:
+            return jsonify(
+                {
+                    "success": False,
+                    "error": f"Missing field: {field}"
+                }
+            ), 400
+            
+    try:
+        new_customer = customer(
+            id=data["id"],
+            name=data["name"],
+            number=data["number"],
+            location=data["location"]
+        )
+        db.session.add(new_customer)
+        db.session.commit()
+        
+        return jsonify(
+            {
+                "success": True,
+                "data": new_customer.dict()
+            }
+        ), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(
+            {
+                "success": False,
+                "error": str(e)
+            }
+        ), 500
