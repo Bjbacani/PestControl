@@ -1,14 +1,57 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
+from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token, get_jwt
+from functools import wraps
+from datetime import timedelta
+import os
 
 app = Flask(__name__)
 
 # Database configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:password@127.0.0.1/mydb'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# JWT configuration
+app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'test-key')
+app.config['JWT_IDENTITY_CLAIM'] = 'sub'
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = False
+jwt = JWTManager(app)
 
 db = SQLAlchemy(app)
 
+# Role-based access control decorator
+def role_required(roles):
+    def decorator(fn):
+        @wraps(fn)
+        def wrapper(*args, **kwargs):
+            claims = get_jwt()
+            if claims.get('role') not in roles:
+                return jsonify({'error': 'Unauthorized'}), 403
+            return fn(*args, **kwargs)
+        return wrapper
+    return decorator
+
+# Add login route
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.json.get('username')
+    password = request.json.get('password')
+    
+    # Mock user verification (replace with your actual user verification)
+    if username == 'admin' and password == 'admin123':
+        access_token = create_access_token(
+            identity={'username': username, 'role': 'admin'}
+        )
+        return jsonify({'token': access_token}), 200
+    elif username == 'user' and password == 'user123':
+        access_token = create_access_token(
+            identity={'username': username, 'role': 'user'}
+        )
+        return jsonify({'token': access_token}), 200
+    
+    return jsonify({'error': 'Invalid credentials'}), 401
+
+# Then modify your existing routes to include authentication...
 
 class customer(db.Model):
     __tablename__ = 'customer'
@@ -27,6 +70,8 @@ class customer(db.Model):
 
 # Add these route handlers
 @app.route("/customer", methods=["GET"])
+@jwt_required()
+@role_required(['admin', 'user'])
 def get_customers():
     customers = customer.query.all()
     return jsonify(
@@ -37,6 +82,8 @@ def get_customers():
     ), 200
 
 @app.route("/customer/<int:id>", methods=['GET'])
+@jwt_required()
+@role_required(['admin', 'user'])
 def get_customer(id):
     cust = db.session.get(customer, id)
     if not cust:
@@ -55,6 +102,8 @@ def get_customer(id):
 
 
 @app.route("/customer", methods=['POST'])
+@jwt_required()
+@role_required(['admin'])
 def add_customer():
     if not request.is_json:
         return jsonify(
@@ -103,6 +152,8 @@ def add_customer():
 
 
 @app.route("/customer/<int:id>", methods=["PUT"])
+@jwt_required()
+@role_required(['admin'])
 def update_customer(id):
     cust = db.session.get(customer, id)
     if not cust:
@@ -129,6 +180,8 @@ def update_customer(id):
     ), 200
 
 @app.route("/customer/<int:id>", methods=["DELETE"])
+@jwt_required()
+@role_required(['admin'])
 def delete_customer(id):
     cust = db.session.get(customer, id)
     if not cust:
@@ -169,6 +222,8 @@ class experiences(db.Model):
         }
 
 @app.route("/experiences", methods=["GET"])
+@jwt_required()
+@role_required(['admin', 'user'])
 def get_experiences():
     exp = experiences.query.limit(100)
     return jsonify(
@@ -179,6 +234,8 @@ def get_experiences():
     ), 200
 
 @app.route("/experiences/<int:id>", methods=['GET'])
+@jwt_required()
+@role_required(['admin', 'user'])
 def get_experience(id):
     exp = db.session.get(experiences, id)
     if not exp:
@@ -197,6 +254,8 @@ def get_experience(id):
 
 
 @app.route("/experiences", methods=['POST'])
+@jwt_required()
+@role_required(['admin'])
 def add_experience():
     if not request.is_json:
         return jsonify(
@@ -244,6 +303,8 @@ def add_experience():
         ), 500
 
 @app.route("/experiences/<int:id>", methods=["PUT"])
+@jwt_required()
+@role_required(['admin'])
 def update_experience(id):
     exp = db.session.get(experiences, id)
     if not exp:
@@ -270,6 +331,8 @@ def update_experience(id):
     ), 200
 
 @app.route("/experiences/<int:id>", methods=["DELETE"])
+@jwt_required()
+@role_required(['admin'])
 def delete_experience(id):
     exp = db.session.get(experiences, id)
     if not exp:
@@ -306,6 +369,8 @@ class products(db.Model):
         }
 
 @app.route("/products", methods=["GET"])
+@jwt_required()
+@role_required(['admin', 'user'])
 def get_prod():
     pr = products.query.limit(100)
     return jsonify(
@@ -316,6 +381,8 @@ def get_prod():
     ), 200
 
 @app.route("/products/<int:id>", methods=['GET'])
+@jwt_required()
+@role_required(['admin', 'user'])
 def get_prods(id):
     prs = db.session.get(products, id)
     if not prs:
@@ -334,6 +401,8 @@ def get_prods(id):
 
 
 @app.route("/products", methods=['POST'])
+@jwt_required()
+@role_required(['admin'])
 def add_prod():
     if not request.is_json:
         return jsonify(
@@ -378,6 +447,8 @@ def add_prod():
     ), 201
 
 @app.route("/products/<int:id>", methods=["PUT"])
+@jwt_required()
+@role_required(['admin'])
 def update_pr(id):
     prs = db.session.get(products, id)
     if not prs:
@@ -404,6 +475,8 @@ def update_pr(id):
     ), 200
     
 @app.route("/products/<int:id>", methods=["DELETE"])
+@jwt_required()
+@role_required(['admin'])
 def delete_pr(id):
     prs = db.session.get(products, id)
     if not prs:
@@ -441,6 +514,8 @@ class purchase(db.Model):
         }
 
 @app.route("/purchase", methods=["GET"])
+@jwt_required()
+@role_required(['admin', 'user'])
 def get_purchases():
     purchases = purchase.query.all()
     return jsonify(
@@ -451,6 +526,8 @@ def get_purchases():
     ), 200
 
 @app.route("/purchase/<int:id>", methods=['GET'])
+@jwt_required()
+@role_required(['admin', 'user'])
 def get_purchase(id):
     purch = db.session.get(purchase, id)
     if not purch:
@@ -468,6 +545,8 @@ def get_purchase(id):
     ), 200
 
 @app.route("/purchase", methods=['POST'])
+@jwt_required()
+@role_required(['admin'])
 def add_purchase():
     if not request.is_json:
         return jsonify(
@@ -514,6 +593,8 @@ def add_purchase():
         ), 500
 
 @app.route("/purchase/<int:id>", methods=["PUT"])
+@jwt_required()
+@role_required(['admin'])
 def update_purchase(id):
     purch = db.session.get(purchase, id)
     if not purch:
@@ -541,6 +622,8 @@ def update_purchase(id):
 
 
 @app.route("/purchase/<int:id>", methods=["DELETE"])
+@jwt_required()
+@role_required(['admin'])
 def delete_purchase(id):
     purch = db.session.get(purchase, id)
     if not purch:
@@ -572,5 +655,5 @@ if __name__ == '__main__':
     except Exception as e:
         print(f"Error: {e}")
     
-    # Run the app
+    # Run the app with correct port
     app.run(debug=True, port=5009)
