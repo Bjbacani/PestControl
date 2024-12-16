@@ -1,17 +1,16 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
 
 app = Flask(__name__)
 
+# Database configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://root:password@127.0.0.1/mydb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
 
 db = SQLAlchemy(app)
 
 class customer(db.Model):
-    __tablename__='customer'
+    __tablename__ = 'customer'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(45), nullable=False)
     number = db.Column(db.String(100), nullable=False)
@@ -23,39 +22,38 @@ class customer(db.Model):
             "name": self.name,
             "number": self.number,
             "location": self.location
-            
-            
         }
+
+# Add these route handlers
 @app.route("/customer", methods=["GET"])
-def get_c():
-    cr = customer.query.limit(100)
+def get_customers():
+    customers = customer.query.all()
     return jsonify(
         {
             "success": True,
-            "data": [crs.dict() for crs in cr]
+            "data": [c.dict() for c in customers]
         }
     ), 200
 
 @app.route("/customer/<int:id>", methods=['GET'])
-def get_cs(id):
-    crs = db.session.get(customer, id)
-    if not crs:
+def get_customer(id):
+    cust = db.session.get(customer, id)
+    if not cust:
         return jsonify(
             {
                 "success": False,
-                "error": "customer not found"
+                "error": "Customer not found"
             }
-        ), 400
+        ), 404
     return jsonify(
         {
             "success": True,
-            "data": crs.dict()
+            "data": cust.dict()
         }
     ), 200
-    
-    
+
 @app.route("/customer", methods=['POST'])
-def add_cust():
+def add_customer():
     if not request.is_json:
         return jsonify(
             {
@@ -76,33 +74,34 @@ def add_cust():
             ), 400
             
     try:
-        new_c = customer(
+        new_customer = customer(
             id=data["id"],
             name=data["name"],
             number=data["number"],
             location=data["location"]
-         )
-        db.session.add(new_c)
+        )
+        db.session.add(new_customer)
         db.session.commit()
+        
+        return jsonify(
+            {
+                "success": True,
+                "data": new_customer.dict()
+            }
+        ), 201
     except Exception as e:
+        db.session.rollback()
         return jsonify(
             {
                 "success": False,
                 "error": str(e)
             }
         ), 500
-    
-    return jsonify(
-        {
-            "success": True,
-            "data": new_c.dict()
-        }
-    ), 201
-    
+
 @app.route("/customer/<int:id>", methods=["PUT"])
-def update_c(id):
-    crs = db.session.get(customer, id)
-    if not crs:
+def update_customer(id):
+    cust = db.session.get(customer, id)
+    if not cust:
         return jsonify(
             {
                 "success": False,
@@ -111,35 +110,49 @@ def update_c(id):
         ), 404
     
     data = request.get_json()
-    updatable_fields = ["id","name", "number", "location"]
+    updatable_fields = ["name", "number", "location"]
     
     for field in updatable_fields:
-        if field not in data:
-            return jsonify(
-                {
-                    "success": False,
-                    "error": f"Missing field: {field}"
-                }
-            ), 400
+        if field in data:
+            setattr(cust, field, data[field])
 
     db.session.commit()
     return jsonify(
         {
             "success": True,
-            "data": customer.dict()
+            "data": cust.dict()
         }
     ), 200
 
 @app.route("/customer/<int:id>", methods=["DELETE"])
-def delete_c(id):
-    crs = db.session.get(customer, id)
-    if not crs:
+def delete_customer(id):
+    cust = db.session.get(customer, id)
+    if not cust:
         return jsonify(
             {
-                "success": True,
-                "message": "customer successfully Deleted"
+                "success": False,
+                "error": "Customer not found"
             }
-        ), 204
+        ), 404
+        
+    db.session.delete(cust)
+    db.session.commit()
+    
+    return jsonify(
+        {
+            "success": True,
+            "message": "Successfully deleted"
+        }
+    ), 204
 
-if __name__ == 'main':
-    app.run(debug=True)
+if __name__ == '__main__':
+    try:
+        # Create tables
+        with app.app_context():
+            db.create_all()
+            print("Database tables created successfully!")
+    except Exception as e:
+        print(f"Error: {e}")
+    
+    # Run the app
+    app.run(debug=True, port=5001)
