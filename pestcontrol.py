@@ -149,7 +149,52 @@ def delete_customer(id):
         }
     ), 204
     
-    #for product table!
+    #for experiences table!
+
+class experiences(db.Model):
+    __tablename__ = 'experiences'
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.String(45), nullable=False)
+    product_id = db.Column(db.Integer, nullable=False)
+    customer_id = db.Column(db.Integer, nullable=False)
+    experience = db.Column(db.String(255), nullable=False)
+    
+    def dict(self):
+        return {
+            "id": self.id,
+            "date": self.date,
+            "product_id": self.product_id,
+            "customer_id": self.customer_id,
+            "experience": self.experience
+        }
+
+@app.route("/experiences", methods=["GET"])
+def get_experiences():
+    exp = experiences.query.limit(100)
+    return jsonify(
+        {
+            "success": True,
+            "data": [e.dict() for e in exp]
+        }
+    ), 200
+
+@app.route("/experiences/<int:id>", methods=['GET'])
+def get_experience(id):
+    exp = db.session.get(experiences, id)
+    if not exp:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Experience not found"
+            }
+        ), 404
+    return jsonify(
+        {
+            "success": True,
+            "data": exp.dict()
+        }
+    ), 200
+
 
 
 
