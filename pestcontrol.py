@@ -403,6 +403,25 @@ def update_pr(id):
         }
     ), 200
     
+@app.route("/products/<int:id>", methods=["DELETE"])
+def delete_pr(id):
+    prs = db.session.get(products, id)
+    if not prs:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Product not found"
+            }
+        ), 404
+    
+    db.session.delete(prs)
+    db.session.commit()
+    return jsonify(
+        {
+            "success": True,
+            "message": "Product successfully Deleted"
+        }
+    ), 204
 
 
 
