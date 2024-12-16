@@ -513,6 +513,31 @@ def add_purchase():
             }
         ), 500
 
+@app.route("/purchase/<int:id>", methods=["PUT"])
+def update_purchase(id):
+    purch = db.session.get(purchase, id)
+    if not purch:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Purchase not found"
+            }
+        ), 404
+    
+    data = request.get_json()
+    updatable_fields = ["date", "product_id", "customer_id"]
+    
+    for field in updatable_fields:
+        if field in data:
+            setattr(purch, field, data[field])
+
+    db.session.commit()
+    return jsonify(
+        {
+            "success": True,
+            "data": purch.dict()
+        }
+    ), 200
 
 
 
