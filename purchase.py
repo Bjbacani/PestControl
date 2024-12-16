@@ -14,8 +14,8 @@ class purchase(db.Model):
     __tablename__='purchase'
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.String(45), nullable=False)
-    product_id = db.Column(db.Integer, primary_key=True)
-    customer_id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, nullable=False)
+    customer_id = db.Column(db.Integer, nullable=False)
     
     def dict(self):
         return {
@@ -156,4 +156,4 @@ def delete_pr(id):
     ), 204
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5000)
