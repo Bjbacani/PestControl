@@ -291,6 +291,46 @@ def delete_experience(id):
     ), 204
 
 
+# for product table!
+class products(db.Model):
+    __tablename__='products'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(45), nullable=False)
+    detail = db.Column(db.String(45), nullable=False)
+    
+    def dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "detail": self.detail
+        }
+
+@app.route("/products", methods=["GET"])
+def get_prod():
+    pr = products.query.limit(100)
+    return jsonify(
+        {
+            "success": True,
+            "data": [prs.dict() for prs in pr]
+        }
+    ), 200
+
+@app.route("/products/<int:id>", methods=['GET'])
+def get_prods(id):
+    prs = db.session.get(products, id)
+    if not prs:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Product not found"
+            }
+        ), 400
+    return jsonify(
+        {
+            "success": True,
+            "data": prs.dict()
+        }
+    ), 200
 
 
 
