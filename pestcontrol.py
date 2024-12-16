@@ -151,3 +151,24 @@ def delete_customer(id):
     
     #for product table!
 
+
+
+
+
+
+
+
+
+
+
+if __name__ == '__main__':
+    try:
+        # Create tables
+        with app.app_context():
+            db.create_all()
+            print("Database tables created successfully!")
+    except Exception as e:
+        print(f"Error: {e}")
+    
+    # Run the app
+    app.run(debug=True, port=5001)
