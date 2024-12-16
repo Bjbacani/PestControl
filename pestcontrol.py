@@ -563,8 +563,6 @@ def delete_purchase(id):
 
 
 
-
-
 if __name__ == '__main__':
     try:
         # Create tables
@@ -575,4 +573,4 @@ if __name__ == '__main__':
         print(f"Error: {e}")
     
     # Run the app
-    app.run(debug=True, port=5001)
+    app.run(debug=True, port=5009)
