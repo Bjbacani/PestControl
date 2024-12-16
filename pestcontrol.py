@@ -540,6 +540,29 @@ def update_purchase(id):
     ), 200
 
 
+@app.route("/purchase/<int:id>", methods=["DELETE"])
+def delete_purchase(id):
+    purch = db.session.get(purchase, id)
+    if not purch:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Purchase not found"
+            }
+        ), 404
+        
+    db.session.delete(purch)
+    db.session.commit()
+    
+    return jsonify(
+        {
+            "success": True,
+            "message": "Successfully deleted"
+        }
+    ), 204
+
+
+
 
 
 if __name__ == '__main__':
