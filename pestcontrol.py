@@ -243,6 +243,31 @@ def add_experience():
             }
         ), 500
 
+@app.route("/experiences/<int:id>", methods=["PUT"])
+def update_experience(id):
+    exp = db.session.get(experiences, id)
+    if not exp:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Experience not found"
+            }
+        ), 404
+    
+    data = request.get_json()
+    updatable_fields = ["date", "product_id", "customer_id", "experience"]
+    
+    for field in updatable_fields:
+        if field in data:
+            setattr(exp, field, data[field])
+
+    db.session.commit()
+    return jsonify(
+        {
+            "success": True,
+            "data": exp.dict()
+        }
+    ), 200
 
 
 
