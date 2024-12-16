@@ -196,6 +196,55 @@ def get_experience(id):
     ), 200
 
 
+@app.route("/experiences", methods=['POST'])
+def add_experience():
+    if not request.is_json:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Content-type must be application/json"
+            }
+        ), 400
+    data = request.get_json()
+    required_fields = ["id", "date", "product_id", "customer_id", "experience"]
+    
+    for field in required_fields:
+        if field not in data:
+            return jsonify(
+                {
+                    "success": False,
+                    "error": f"Missing field: {field}"
+                }
+            ), 400
+            
+    try:
+        new_experience = experiences(
+            id=data["id"],
+            date=data["date"],
+            product_id=data["product_id"],
+            customer_id=data["customer_id"],
+            experience=data["experience"]
+        )
+        db.session.add(new_experience)
+        db.session.commit()
+        
+        return jsonify(
+            {
+                "success": True,
+                "data": new_experience.dict()
+            }
+        ), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(
+            {
+                "success": False,
+                "error": str(e)
+            }
+        ), 500
+
+
+
 
 
 
