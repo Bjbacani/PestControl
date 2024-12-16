@@ -269,6 +269,27 @@ def update_experience(id):
         }
     ), 200
 
+@app.route("/experiences/<int:id>", methods=["DELETE"])
+def delete_experience(id):
+    exp = db.session.get(experiences, id)
+    if not exp:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Experience not found"
+            }
+        ), 404
+        
+    db.session.delete(exp)
+    db.session.commit()
+    
+    return jsonify(
+        {
+            "success": True,
+            "message": "Successfully deleted"
+        }
+    ), 204
+
 
 
 
