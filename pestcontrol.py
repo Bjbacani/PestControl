@@ -99,3 +99,31 @@ def add_customer():
                 "error": str(e)
             }
         ), 500
+
+
+
+@app.route("/customer/<int:id>", methods=["PUT"])
+def update_customer(id):
+    cust = db.session.get(customer, id)
+    if not cust:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Customer not found"
+            }
+        ), 404
+    
+    data = request.get_json()
+    updatable_fields = ["name", "number", "location"]
+    
+    for field in updatable_fields:
+        if field in data:
+            setattr(cust, field, data[field])
+
+    db.session.commit()
+    return jsonify(
+        {
+            "success": True,
+            "data": cust.dict()
+        }
+    ), 200
