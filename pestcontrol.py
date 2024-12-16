@@ -467,6 +467,51 @@ def get_purchase(id):
         }
     ), 200
 
+@app.route("/purchase", methods=['POST'])
+def add_purchase():
+    if not request.is_json:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Content-type must be application/json"
+            }
+        ), 400
+    data = request.get_json()
+    required_fields = ["id", "date", "product_id", "customer_id"]
+    
+    for field in required_fields:
+        if field not in data:
+            return jsonify(
+                {
+                    "success": False,
+                    "error": f"Missing field: {field}"
+                }
+            ), 400
+            
+    try:
+        new_purchase = purchase(
+            id=data["id"],
+            date=data["date"],
+            product_id=data["product_id"],
+            customer_id=data["customer_id"]
+        )
+        db.session.add(new_purchase)
+        db.session.commit()
+        
+        return jsonify(
+            {
+                "success": True,
+                "data": new_purchase.dict()
+            }
+        ), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify(
+            {
+                "success": False,
+                "error": str(e)
+            }
+        ), 500
 
 
 
