@@ -127,3 +127,27 @@ def update_customer(id):
             "data": cust.dict()
         }
     ), 200
+
+@app.route("/customer/<int:id>", methods=["DELETE"])
+def delete_customer(id):
+    cust = db.session.get(customer, id)
+    if not cust:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Customer not found"
+            }
+        ), 404
+        
+    db.session.delete(cust)
+    db.session.commit()
+    
+    return jsonify(
+        {
+            "success": True,
+            "message": "Successfully deleted"
+        }
+    ), 204
+    
+    #for product table!
+
