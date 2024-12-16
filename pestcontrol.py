@@ -423,6 +423,49 @@ def delete_pr(id):
         }
     ), 204
 
+# for purchase table!
+
+class purchase(db.Model):
+    __tablename__='purchase'
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.String(45), nullable=False)
+    product_id = db.Column(db.Integer, nullable=False)
+    customer_id = db.Column(db.Integer, nullable=False)
+    
+    def dict(self):
+        return {
+            "id": self.id,
+            "date": self.date,
+            "product_id": self.product_id,
+            "customer_id": self.customer_id
+        }
+
+@app.route("/purchase", methods=["GET"])
+def get_purchases():
+    purchases = purchase.query.all()
+    return jsonify(
+        {
+            "success": True,
+            "data": [p.dict() for p in purchases]
+        }
+    ), 200
+
+@app.route("/purchase/<int:id>", methods=['GET'])
+def get_purchase(id):
+    purch = db.session.get(purchase, id)
+    if not purch:
+        return jsonify(
+            {
+                "success": False,
+                "error": "Purchase not found"
+            }
+        ), 404
+    return jsonify(
+        {
+            "success": True,
+            "data": purch.dict()
+        }
+    ), 200
 
 
 
