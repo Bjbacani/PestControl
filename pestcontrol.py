@@ -1,6 +1,6 @@
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import JWTManager, jwt_required, get_jwt_identity, create_access_token, get_jwt
+from flask_jwt_extended import JWTManager, jwt_required, create_access_token, get_jwt
 from functools import wraps
 from datetime import timedelta
 import os
@@ -8,7 +8,8 @@ import os
 app = Flask(__name__)
 
 # Database configuration
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db' for testing
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:password@127.0.0.1/mydb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # JWT configuration
@@ -40,31 +41,33 @@ def login():
     # Mock user verification (replace with your actual user verification)
     if username == 'admin' and password == 'admin123':
         access_token = create_access_token(
-            identity={'username': username, 'role': 'admin'}
+            identity='admin', additional_claims={'role': 'admin'}
         )
         return jsonify({'token': access_token}), 200
     elif username == 'user' and password == 'user123':
         access_token = create_access_token(
-            identity={'username': username, 'role': 'user'}
+             identity='user', additional_claims={'role': 'user'}
         )
         return jsonify({'token': access_token}), 200
     
     return jsonify({'error': 'Invalid credentials'}), 401
 
-# Then modify your existing routes to include authentication...
+
 
 class customer(db.Model):
     __tablename__ = 'customer'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(45), nullable=False)
-    number = db.Column(db.String(100), nullable=False)
+    fname = db.Column(db.String(45), nullable=False)
+    lastname = db.Column(db.String(45), nullable=False)
+    contact = db.Column(db.String(45), nullable=False)
     location = db.Column(db.String(45), nullable=False)
     
     def dict(self):
         return {
             "id": self.id,
-            "name": self.name,
-            "number": self.number,
+            "fname": self.fname,
+            "lastname": self.lastname,
+            "contact": self.contact,
             "location": self.location
         }
 
@@ -127,8 +130,9 @@ def add_customer():
     try:
         new_customer = customer(
             id=data["id"],
-            name=data["name"],
-            number=data["number"],
+            fname=data["fname"],
+            lastname=data["fname"],
+            contact=data["contact"],
             location=data["location"]
         )
         db.session.add(new_customer)
@@ -165,7 +169,7 @@ def update_customer(id):
         ), 404
     
     data = request.get_json()
-    updatable_fields = ["name", "number", "location"]
+    updatable_fields = ["fname","lastname", "contact", "location"]
     
     for field in updatable_fields:
         if field in data:
@@ -202,6 +206,7 @@ def delete_customer(id):
         }
     ), 204
     
+
     #for experiences table!
 
 class experiences(db.Model):
@@ -359,13 +364,17 @@ class products(db.Model):
     __tablename__='products'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(45), nullable=False)
-    detail = db.Column(db.String(45), nullable=False)
+    c_method = db.Column(db.String(45), nullable=False)
+    c_type = db.Column(db.String(45), nullable=False)
+    pest = db.Column(db.String(45), nullable=False)
     
     def dict(self):
         return {
             "id": self.id,
             "name": self.name,
-            "detail": self.detail
+            "c_method": self.c_method,
+            "c_type": self.c_type,
+            "pest": self.pest
         }
 
 @app.route("/products", methods=["GET"])
@@ -412,7 +421,7 @@ def add_prod():
             }
         ), 400
     data = request.get_json()
-    required_fields = ["id", "name", "detail"]
+    required_fields = ["id", "name", "c_method", "c_type","pest"]
     
     for field in required_fields:
         if field not in data:
@@ -427,7 +436,9 @@ def add_prod():
         new_pr = products(
             id=data["id"],
             name=data["name"],
-            detail=data["detail"]
+            c_method=data["c_method"],
+            c_type=data["c_type"],
+            pest=data["pest"]
          )
         db.session.add(new_pr)
         db.session.commit()
@@ -460,7 +471,7 @@ def update_pr(id):
         ), 404
     
     data = request.get_json()
-    updatable_fields = ["id", "name", "detail"]
+    updatable_fields = ["id", "name", "c_method","c_type","pest"]
     
     for field in updatable_fields:
         if field in data:
@@ -648,7 +659,7 @@ def delete_purchase(id):
 
 if __name__ == '__main__':
     try:
-        # Create tables
+    
         with app.app_context():
             db.create_all()
             print("Database tables created successfully!")

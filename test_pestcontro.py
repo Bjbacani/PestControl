@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from flask import json
-from pestcontrol import app, customer, products, db
+from pestcontrol import app, customer, products, experiences,purchase, db
 from flask_jwt_extended import create_access_token
 import os
 
@@ -53,8 +53,9 @@ def client():
 def create_mock_customer():
     return {
         "id": 1,
-        "name": "Test Customer",
-        "number": "1234567890",
+        "fname": "Test fname",
+        "lastname": "test lastname",
+        "contact": "test contact",
         "location": "Test Location"
     }
 
@@ -62,7 +63,9 @@ def create_mock_product():
     return {
         "id": 1,
         "name": "Test Product",
-        "detail": "Test Detail"
+        "c_method": "Test c_method",
+        "c_type": "Test c_type",
+        "pest": "Test pest"
     }
 
 def create_mock_purchase():
@@ -76,7 +79,7 @@ def create_mock_purchase():
 def create_mock_experience():
     return {
         "id": 1,
-        "date": "2024-01-01",
+        "date": "test date",
         "product_id": 1,
         "customer_id": 1,
         "experience": "Test Experience"
@@ -141,9 +144,67 @@ class TestProduct:
                              headers=admin_headers)
         assert response.status_code == 201
 
+class TestExperiences:
+    def test_get_experiences_success(self, client, user_headers):
+        with app.app_context():
+            mock_exp = experiences(**create_mock_experience())
+            db.session.add(mock_exp)
+            db.session.commit()
+            experience_id = mock_exp.id 
+
+        response = client.get("/experiences", headers=user_headers)
+        assert response.status_code == 200  
+
+    def test_get_experience_success(self, client, user_headers):
+        with app.app_context():
+            mock_exp = experiences(**create_mock_experience())
+            db.session.add(mock_exp)
+            db.session.commit()
+            experience_id = mock_exp.id 
+
+        response = client.get(f"/experiences/{experience_id}", headers=user_headers)
+        assert response.status_code == 200
+
+    def test_create_experience_success(self, client, admin_headers):
+        mock_data = create_mock_experience()
+        response = client.post("/experiences",
+                             data=json.dumps(mock_data),
+                             headers=admin_headers)
+        assert response.status_code == 201  
+
+class TestPurchase:
+    def test_get_purchase_success(self,client,user_headers):
+        with app.app_context():
+            mock_pur = purchase(**create_mock_purchase())
+            db.session.add(mock_pur)
+            db.session.commit()
+            purchase_id = mock_pur.id
+
+        response = client.get("/purchase", headers=user_headers)
+        assert response.status_code == 200
+
+    def test_get_purchase_success(self,client,user_headers):
+        with app.app_context():
+            mock_pur = purchase(**create_mock_purchase())
+            db.session.add(mock_pur)
+            db.session.commit()
+            purchase_id = mock_pur.id
+
+        response = client.get(f"/purchase/{purchase_id}", headers=user_headers)
+        assert response.status_code == 200 
+    
+    def test_create_purchase_success(self,client,admin_headers):
+        mock_data = create_mock_purchase()
+        response = client.post("/purchase",
+                             data=json.dumps(mock_data),
+                             headers=admin_headers)
+        assert response.status_code == 201
+
+
+
 # Error test cases
 def test_unauthorized_access(client, user_headers):
-    # Test user trying to create customer (admin only)
+    
     mock_data = create_mock_customer()
     response = client.post("/customer",
                           data=json.dumps(mock_data),
@@ -156,7 +217,7 @@ def test_invalid_token(client):
     assert response.status_code == 422
 
 def test_missing_required_fields(client, admin_headers):
-    invalid_data = {"name": "Test"}  # Missing required fields
+    invalid_data = {"name": "Test"}  
     response = client.post("/customer",
                           data=json.dumps(invalid_data),
                           headers=admin_headers)
