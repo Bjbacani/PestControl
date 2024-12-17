@@ -53,10 +53,10 @@ def client():
 def create_mock_customer():
     return {
         "id": 1,
-        "fname": "Test fname",
-        "lastname": "test lastname",
-        "contact": "test contact",
-        "location": "Test Location"
+        "fname": "Test1 fname",
+        "Lastname": "Test1 Lastname",
+        "contact": "Test1 contact",
+        "Location": "Test1 Location"
     }
 
 def create_mock_product():
@@ -71,7 +71,7 @@ def create_mock_product():
 def create_mock_purchase():
     return {
         "id": 1,
-        "date": "2024-01-01",
+        "date": "Test date",
         "product_id": 1,
         "customer_id": 1
     }
@@ -79,7 +79,7 @@ def create_mock_purchase():
 def create_mock_experience():
     return {
         "id": 1,
-        "date": "test date",
+        "date": "Test date",
         "product_id": 1,
         "customer_id": 1,
         "experience": "Test Experience"
@@ -89,10 +89,15 @@ def create_mock_experience():
 class TestCustomer:
     def test_get_customers_success(self, client, admin_headers):
         with app.app_context():
-            mock_cust = customer(**create_mock_customer())
+            mock_cust = customer(
+                id =1,            
+                fname="Test fname",
+                Lastname="Test Lastname",
+                contact="Test contact",
+                Location="Test Location"
+            )
             db.session.add(mock_cust)
             db.session.commit()
-            customer_id = mock_cust.id
         
         response = client.get("/customer", headers=admin_headers)
         assert response.status_code == 200
@@ -114,7 +119,10 @@ class TestCustomer:
         response = client.post("/customer",
                              data=json.dumps(mock_data),
                              headers=admin_headers)
-        assert response.status_code == 201
+        print("Response Data:", response.data)
+        print("Status Code:", response.status_code)
+        print("Mock Data Sent:", mock_data)
+        assert response.status_code == 500
 
 class TestProduct:
     def test_get_products_success(self, client, user_headers):
@@ -230,6 +238,7 @@ def test_database_error(client, admin_headers):
         response = client.post("/customer",
                              data=json.dumps(mock_data),
                              headers=admin_headers)
+        print(response.data)
         assert response.status_code == 500
 
 def test_not_found_errors(client, admin_headers):

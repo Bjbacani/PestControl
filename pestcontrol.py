@@ -8,7 +8,10 @@ import os
 app = Flask(__name__)
 
 # Database configuration
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db' for testing
+#for testing pytest use this
+#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+
+#for production use this
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:password@127.0.0.1/mydb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -58,17 +61,17 @@ class customer(db.Model):
     __tablename__ = 'customer'
     id = db.Column(db.Integer, primary_key=True)
     fname = db.Column(db.String(45), nullable=False)
-    lastname = db.Column(db.String(45), nullable=False)
+    Lastname = db.Column(db.String(45), nullable=False)
     contact = db.Column(db.String(45), nullable=False)
-    location = db.Column(db.String(45), nullable=False)
+    Location = db.Column(db.String(45), nullable=False)
     
     def dict(self):
         return {
             "id": self.id,
             "fname": self.fname,
-            "lastname": self.lastname,
+            "Lastname": self.Lastname,
             "contact": self.contact,
-            "location": self.location
+            "Location": self.Location
         }
 
 # Add these route handlers
@@ -116,7 +119,7 @@ def add_customer():
             }
         ), 400
     data = request.get_json()
-    required_fields = ["id", "name", "number", "location"]
+    required_fields = ["id", "fname", "Lastname", "contact", "Location"]
     
     for field in required_fields:
         if field not in data:
@@ -131,9 +134,9 @@ def add_customer():
         new_customer = customer(
             id=data["id"],
             fname=data["fname"],
-            lastname=data["fname"],
+            lastname=data["Lastname"],
             contact=data["contact"],
-            location=data["location"]
+            location=data["Location"]
         )
         db.session.add(new_customer)
         db.session.commit()
@@ -169,7 +172,7 @@ def update_customer(id):
         ), 404
     
     data = request.get_json()
-    updatable_fields = ["fname","lastname", "contact", "location"]
+    updatable_fields = ["fname","Lastname", "contact", "Location"]
     
     for field in updatable_fields:
         if field in data:
@@ -248,7 +251,7 @@ def get_experience(id):
             {
                 "success": False,
                 "error": "Experience not found"
-            }
+            }           
         ), 404
     return jsonify(
         {
@@ -659,9 +662,7 @@ def delete_purchase(id):
 
 if __name__ == '__main__':
     try:
-    
         with app.app_context():
-            db.create_all()
             print("Database tables created successfully!")
     except Exception as e:
         print(f"Error: {e}")
