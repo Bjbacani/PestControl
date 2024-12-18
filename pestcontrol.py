@@ -56,7 +56,7 @@ def login():
 
 class customer(db.Model):
     __tablename__ = 'customer'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True ,autoincrement=True )
     fname = db.Column(db.String(45), nullable=False)
     Lastname = db.Column(db.String(45), nullable=False)
     contact = db.Column(db.String(45), nullable=False)
@@ -211,18 +211,18 @@ def delete_customer(id):
 
 class experiences(db.Model):
     __tablename__ = 'experiences'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True,autoincrement=True )
     date = db.Column(db.String(45), nullable=False)
-    product_id = db.Column(db.Integer, nullable=False)
     customer_id = db.Column(db.Integer, nullable=False)
+    product_id = db.Column(db.Integer, nullable=False)
     experience = db.Column(db.String(255), nullable=False)
     
     def dict(self):
         return {
             "id": self.id,
             "date": self.date,
-            "product_id": self.product_id,
             "customer_id": self.customer_id,
+            "product_id": self.product_id,
             "experience": self.experience
         }
 
@@ -270,7 +270,7 @@ def add_experience():
             }
         ), 400
     data = request.get_json()
-    required_fields = ["id", "date", "product_id", "customer_id", "experience"]
+    required_fields = ["id", "date", "customer_id", "product_id", "experience"]
     
     for field in required_fields:
         if field not in data:
@@ -285,8 +285,8 @@ def add_experience():
         new_experience = experiences(
             id=data["id"],
             date=data["date"],
-            product_id=data["product_id"],
             customer_id=data["customer_id"],
+            product_id=data["product_id"],
             experience=data["experience"]
         )
         db.session.add(new_experience)
@@ -321,7 +321,7 @@ def update_experience(id):
         ), 404
     
     data = request.get_json()
-    updatable_fields = ["date", "product_id", "customer_id", "experience"]
+    updatable_fields = ["date", "customer_id", "product_id", "experience"]
     
     for field in updatable_fields:
         if field in data:
@@ -362,7 +362,7 @@ def delete_experience(id):
 # for product table!
 class product(db.Model):
     __tablename__='product'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True,autoincrement=True )
     name = db.Column(db.String(45), nullable=False)
     c_method = db.Column(db.String(45), nullable=False)
     c_type = db.Column(db.String(45), nullable=False)
@@ -511,7 +511,7 @@ def delete_pr(id):
 
 class purchase(db.Model):
     __tablename__='purchase'
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True,autoincrement=True )
     date = db.Column(db.String(45), nullable=False)
     product_id = db.Column(db.Integer, nullable=False)
     customer_id = db.Column(db.Integer, nullable=False)
@@ -660,7 +660,8 @@ def delete_purchase(id):
 if __name__ == '__main__':
     try:
         with app.app_context():
-            print("Database tables created successfully!")
+            #db.create_all()
+            print("Database successfully connected!")
     except Exception as e:
         print(f"Error: {e}")
     
