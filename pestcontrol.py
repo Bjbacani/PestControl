@@ -8,10 +8,7 @@ import os
 app = Flask(__name__)
 
 # Database configuration
-#for testing pytest use this
-#app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 
-#for production use this
 app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:password@127.0.0.1/mydb'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -134,9 +131,9 @@ def add_customer():
         new_customer = customer(
             id=data["id"],
             fname=data["fname"],
-            lastname=data["Lastname"],
+            Lastname=data["Lastname"],
             contact=data["contact"],
-            location=data["Location"]
+            Location=data["Location"]
         )
         db.session.add(new_customer)
         db.session.commit()
@@ -363,8 +360,8 @@ def delete_experience(id):
 
 
 # for product table!
-class products(db.Model):
-    __tablename__='products'
+class product(db.Model):
+    __tablename__='product'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(45), nullable=False)
     c_method = db.Column(db.String(45), nullable=False)
@@ -380,11 +377,11 @@ class products(db.Model):
             "pest": self.pest
         }
 
-@app.route("/products", methods=["GET"])
+@app.route("/product", methods=["GET"])
 @jwt_required()
 @role_required(['admin', 'user'])
 def get_prod():
-    pr = products.query.limit(100)
+    pr = product.query.limit(100)
     return jsonify(
         {
             "success": True,
@@ -392,11 +389,11 @@ def get_prod():
         }
     ), 200
 
-@app.route("/products/<int:id>", methods=['GET'])
+@app.route("/product/<int:id>", methods=['GET'])
 @jwt_required()
 @role_required(['admin', 'user'])
 def get_prods(id):
-    prs = db.session.get(products, id)
+    prs = db.session.get(product, id)
     if not prs:
         return jsonify(
             {
@@ -412,7 +409,7 @@ def get_prods(id):
     ), 200
 
 
-@app.route("/products", methods=['POST'])
+@app.route("/product", methods=['POST'])
 @jwt_required()
 @role_required(['admin'])
 def add_prod():
@@ -436,7 +433,7 @@ def add_prod():
             ), 400
             
     try:
-        new_pr = products(
+        new_pr = product(
             id=data["id"],
             name=data["name"],
             c_method=data["c_method"],
@@ -460,11 +457,11 @@ def add_prod():
         }
     ), 201
 
-@app.route("/products/<int:id>", methods=["PUT"])
+@app.route("/product/<int:id>", methods=["PUT"])
 @jwt_required()
 @role_required(['admin'])
 def update_pr(id):
-    prs = db.session.get(products, id)
+    prs = db.session.get(product, id)
     if not prs:
         return jsonify(
             {
@@ -488,11 +485,11 @@ def update_pr(id):
         }
     ), 200
     
-@app.route("/products/<int:id>", methods=["DELETE"])
+@app.route("/product/<int:id>", methods=["DELETE"])
 @jwt_required()
 @role_required(['admin'])
 def delete_pr(id):
-    prs = db.session.get(products, id)
+    prs = db.session.get(product, id)
     if not prs:
         return jsonify(
             {
