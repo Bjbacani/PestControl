@@ -35,6 +35,7 @@ def role_required(roles):
 # Add login route
 @app.route('/login', methods=['POST'])
 def login():
+  
     username = request.json.get('username')
     password = request.json.get('password')
     
@@ -471,7 +472,7 @@ def update_pr(id):
         ), 404
     
     data = request.get_json()
-    updatable_fields = ["id", "name", "c_method","c_type","pest"]
+    updatable_fields = ["name", "c_method","c_type","pest"]
     
     for field in updatable_fields:
         if field in data:

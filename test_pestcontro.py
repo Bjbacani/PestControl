@@ -1,7 +1,7 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from flask import json
-from pestcontrol import app, customer, products, experiences,purchase, db
+from pestcontrol import app, customer, product, experiences,purchase, db
 from flask_jwt_extended import create_access_token
 import os
 
@@ -122,32 +122,32 @@ class TestCustomer:
         print("Response Data:", response.data)
         print("Status Code:", response.status_code)
         print("Mock Data Sent:", mock_data)
-        assert response.status_code == 500
+        assert response.status_code == 201
 
 class TestProduct:
     def test_get_products_success(self, client, user_headers):
         with app.app_context():
-            mock_prod = products(**create_mock_product())
+            mock_prod = product(**create_mock_product())
             db.session.add(mock_prod)
             db.session.commit()
             product_id = mock_prod.id
         
-        response = client.get("/products", headers=user_headers)
+        response = client.get("/product", headers=user_headers)
         assert response.status_code == 200
 
     def test_get_product_success(self, client, user_headers):
         with app.app_context():
-            mock_prod = products(**create_mock_product())
+            mock_prod = product(**create_mock_product())
             db.session.add(mock_prod)
             db.session.commit()
             product_id = mock_prod.id
         
-        response = client.get(f"/products/{product_id}", headers=user_headers)
+        response = client.get(f"/product/{product_id}", headers=user_headers)
         assert response.status_code == 200
 
     def test_create_product_success(self, client, admin_headers):
         mock_data = create_mock_product()
-        response = client.post("/products",
+        response = client.post("/product",
                              data=json.dumps(mock_data),
                              headers=admin_headers)
         assert response.status_code == 201
